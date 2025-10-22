@@ -31,6 +31,15 @@ class UserController {
         }
     }
 
+    async UserForgetPass(req,res) {
+        try {
+            const data = await this.userService.userForgetPassword(req.body);
+            res.send(data)
+        } catch (error) {
+            res.send({message:error.message})
+        }
+    }
+
         
     
 }
