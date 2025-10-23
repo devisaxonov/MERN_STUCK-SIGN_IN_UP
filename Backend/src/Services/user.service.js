@@ -16,12 +16,29 @@ class UserService {
 
         const hashedPass = await bcrypt.hash(password, 12);
 
+        const verifyToken = crypto.randomBytes(32).toString('hex');
+
         const newUser = await User.create({
-            name, email, password: hashedPass,
+            name,
+            email,
+            password: hashedPass,
+            verificationToken:verifyToken
         });
         
+        const verifyLink = `${process.env.CLIENT_URL}/verify/${verifyToken}`;
+
+        const verifyContent = `
+        <h2>Verify Email Request</h2>
+        <p>Click the link below to verify your email</p>
+        <a href='${verifyLink} target="_blank"'>${verifyLink}</a>
+        <p>This link will expire in 1 hour</p>
+        `
+
+        await sendEmail(newUser.email, "Verify Email Request", verifyContent);
+
         return {
-            message:"User registered successfully!"
+            message: `User registered successfully!
+            Verification link sended`
         }
         
     }
@@ -66,6 +83,43 @@ class UserService {
 
         return {
             message: 'Password reset email sended!'
+        }
+    }
+
+    async ResetPassword({token,password}) {
+        
+        const user = await User.findOne({
+            resetPasswordToken: token,
+            resetPasswordDate:{$gt: Date.now()}
+        })
+
+        if (!user) throw new CustomError("Invalid or expired token", 401);
+
+        user.password = await bcrypt.hash(password, 12);
+        user.resetPasswordToken = undefined;
+        user.resetPasswordDate = undefined;
+
+        await user.save();
+
+        return {
+            message: "Password reset successfully!",
+            user
+        }
+    }
+
+    async verifyEmail(token) {    
+        const user = await User.findOne({ verificationToken: token.split(' ')[0]});
+
+        if (!user) throw new CustomError("Invalid token", 401);
+
+        if (user.isVerified) return {
+            message: "Email already verified!"
+        }
+
+        user.isVerified = true;
+        await user.save()
+        return {
+            message:"Your email verified successfully!"
         }
     }
 }

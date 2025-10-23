@@ -1,6 +1,9 @@
 import joi from 'joi'
 
-export const validateResetPass = joi.object({
-    email: joi.string()
-            .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net'] } }),
+
+const resetPassValidate = joi.object({
+    password: joi.string()
+            .pattern(new RegExp('^[a-zA-Z0-9]{3,30}$'))
 })
+
+export default resetPassValidate;

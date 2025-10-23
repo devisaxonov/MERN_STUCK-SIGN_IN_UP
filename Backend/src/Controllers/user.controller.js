@@ -40,6 +40,30 @@ class UserController {
         }
     }
 
+    async UserResetPassword(req, res) {
+        try {
+            const token = req.params.token;
+            const password = req.body.password;
+            
+            const data = await this.userService.ResetPassword({ token, password });
+
+            res.status(200).json({ ...data });
+        } catch (error) {
+            res.send({message:error.message})
+        }
+    }
+
+    async verifyEmail(req, res) {
+        try {
+            const token = req.params.token;
+            const data = await this.userService.verifyEmail(token)
+            
+            res.send(data)
+        } catch (error) {
+            res.send({message:error.message})
+        }
+    }
+
         
     
 }
