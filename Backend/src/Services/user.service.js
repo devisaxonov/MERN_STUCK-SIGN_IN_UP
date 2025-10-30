@@ -110,13 +110,14 @@ class UserService {
     async verifyEmail(token) {    
         const user = await User.findOne({ verificationToken: token.split(' ')[0]});
 
-        if (!user) throw new CustomError("Invalid token", 401);
+        if (!user) throw new CustomError("Invalid or expired token", 401);
 
         if (user.isVerified) return {
             message: "Email already verified!"
         }
 
         user.isVerified = true;
+        user.verificationToken = undefined;
         await user.save()
         return {
             message:"Your email verified successfully!"

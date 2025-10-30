@@ -64,6 +64,23 @@ class UserController {
         }
     }
 
+    async UserLogOut(req,res) {
+        try {
+            res.clearCookie('token', {
+                httpOnly: true,
+                secure: false,
+                samesite: 'strict'
+            });
+
+            res.send({
+                message:'LogOut successfully!'
+            })
+
+        } catch (error) {
+            res.send({message:error.message})
+        }
+    }
+
         
     
 }
